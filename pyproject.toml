@@ -24,6 +24,8 @@ py-modules = [
     "simulated_annealing",
     "evolution_strategy",
     "genetic_algorithm",
+    "boundary",
+    "params_store",
 ]
 
 [tool.pytest.ini_options]
