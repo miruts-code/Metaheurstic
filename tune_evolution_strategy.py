@@ -1,9 +1,4 @@
 """Automated pilot-seed grid search for evolution_strategy.py.
-
-Grid (per our discussion): mu_over_lambda x lambda_ x sigma_frac swept;
-replacement fixed at "comma" for this pilot pass (weakest-justified dial --
-revisit with a targeted comma-vs-plus comparison later if time allows).
--> 2 x 3 x 3 = 18 combinations per benchmark, matching SA's grid size.
 """
 import itertools
 import numpy as np

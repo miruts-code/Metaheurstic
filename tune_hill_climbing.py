@@ -1,13 +1,4 @@
-"""Automated pilot-seed grid search for hill_climbing.py.
-
-Tunes each benchmark SEPARATELY (Sphere/Rastrigin/Rosenbrock can want
-different settings), using PILOT_SEEDS only, and freezes the winner into
-best_parameters.json. Not part of the final submission -- a one-off tool.
-
-Each candidate is scored by: median(final objective across pilot seeds),
-normalized by that benchmark's random-search baseline median, so results
-across benchmarks of very different raw scale are comparable.
-"""
+"""Automated pilot-seed grid search for hill_climbing.py."""
 import itertools
 import numpy as np
 

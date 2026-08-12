@@ -1,20 +1,4 @@
-"""Student file: Simulated Annealing.
-
-Design choices (justified in the report):
-- Neighborhood: same Gaussian-step design as hill_climbing.py, sigma =
-  sigma_frac * domain_width, using boundary.reflect().
-- Starting temperature: NOT a fixed constant across benchmarks -- calibrated
-  per run from a short probe of this objective's own typical "bad move" size,
-  so that a bad move is accepted with probability ~= p0 at the very start.
-  This keeps p0 (a 0-1, benchmark-independent quantity) as the actual tuned
-  dial, rather than tuning a raw temperature whose meaning depends on each
-  benchmark's numeric scale.
-- Cooling schedule: geometric, T <- alpha * T, applied once per evaluation.
-- Stopping rule / reheating: if reheat_enabled, T is reset to a fraction of
-  T0 once it drops below a small floor, giving the search another
-  exploratory wave instead of degenerating into pure greedy descent for
-  the remainder of the budget.
-"""
+"""Student file: Simulated Annealing."""
 import numpy as np
 
 from experiment import run_experiment
@@ -22,7 +6,7 @@ from boundary import reflect
 from params_store import load_parameters
 
 BENCHMARKS_TO_RUN = ["sphere", "rastrigin", "rosenbrock"]
-SEEDS = [0]  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
+SEEDS = range(100, 120)  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
 MAX_EVALUATIONS = 20_000
 
 DEFAULT_PARAMETERS = {

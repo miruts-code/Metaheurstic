@@ -1,25 +1,12 @@
-"""Student file: Random-Restart Hill Climbing.
+"""Student file: Random-Restart Hill Climbing."""
 
-Design choices (justified in the report):
-- Neighborhood: Gaussian step, sigma = sigma_frac * domain_width. Small,
-  consistent local moves so the "hill climbing" part stays meaningful.
-- Boundary policy: reflect (see boundary.py) -- avoids the boundary-pileup
-  problem clip would cause, and correctly handles any number of crossings.
-- Restart trigger: no restart on ANY improvement -- only on a MEANINGFUL
-  improvement (> epsilon). This avoids "improvement stagnation," where tiny
-  genuine improvements inside one basin (common on Rastrigin) reset the
-  patience counter forever and the run never restarts.
-- Hard local-budget cap: in addition to the no-improvement trigger, no
-  single basin may consume more than max_local_budget evaluations, win or
-  lose. This is what actually forces diversity on Rastrigin, WITHOUT needing
-  a different (larger) sigma there -- sigma stays uniform across benchmarks.
-"""
+
 from experiment import run_experiment
 from boundary import reflect
 from params_store import load_parameters
 
 BENCHMARKS_TO_RUN = ["sphere", "rastrigin", "rosenbrock"]
-SEEDS = [0]  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
+SEEDS = range(100, 120)  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
 MAX_EVALUATIONS = 20_000
 
 # Fallback defaults, used only if best_parameters.json has no entry yet

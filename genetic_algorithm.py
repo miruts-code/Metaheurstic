@@ -1,35 +1,7 @@
 """Student file: Genetic Algorithm -- tournament selection, blend crossover,
-Gaussian mutation.
+Gaussian mutation."""
 
-Design choices (justified in the report):
-- Selection: tournament (size=3, fixed). Chosen over roulette because
-  roulette's selection probability is proportional to RAW fitness value,
-  which makes it highly sensitive to a benchmark's numeric scale (e.g. one
-  outlier individual on Rosenbrock can dominate >90% of selection
-  probability). Tournament only ever compares individuals within a small
-  random group, so it stays well-behaved across benchmarks of very
-  different raw scale without needing extra fitness-rescaling machinery.
-  tournament_size=3 is a moderate, literature-standard choice: meaningful
-  pressure toward quality without collapsing population diversity in 1-2
-  generations (fixed for the pilot grid; not swept, see tune file).
-- Crossover: blend/arithmetic (child = w*parentA + (1-w)*parentB, w drawn
-  per-gene from a widened [-alpha, 1+alpha] range -- BLX-alpha). Chosen over
-  one-/two-point or uniform crossover because those can only ever
-  reassign EXISTING parent coordinate values to a child -- for continuous
-  variables, blend crossover can produce genuinely new intermediate (or
-  mildly extrapolated) values, a real source of exploration the discrete-
-  style operators lack.
-- Mutation: Gaussian, sigma = sigma_frac * domain_width (same normalized
-  design as hill_climbing.py / simulated_annealing.py / evolution_strategy.py),
-  applied independently per-gene with probability mutation_rate=0.1 (fixed;
-  approximately 1/dimension, a standard heuristic -- sigma_frac already
-  covers the primary mutation-STRENGTH dial, so sweeping mutation_rate too
-  would mostly duplicate that effect rather than test something new).
-- Replacement: generational -- the whole population is replaced by
-  population_size offspring each generation (elitism: the single best
-  individual is always carried over unchanged, so the best-ever solution
-  can never be lost even though selection/crossover/mutation are lossy).
-"""
+
 import numpy as np
 
 from experiment import run_experiment
@@ -37,7 +9,7 @@ from boundary import reflect
 from params_store import load_parameters
 
 BENCHMARKS_TO_RUN = ["sphere", "rastrigin", "rosenbrock"]
-SEEDS = [0]  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
+SEEDS = range(100, 120)  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
 MAX_EVALUATIONS = 20_000
 
 TOURNAMENT_SIZE = 3         # fixed (see design rationale above)

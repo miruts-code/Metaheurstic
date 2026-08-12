@@ -1,9 +1,4 @@
-"""Automated pilot-seed grid search for simulated_annealing.py.
-
-Same methodology as tune_hill_climbing.py: tune each benchmark separately
-on PILOT_SEEDS, score by median final objective normalized against the
-random-search baseline, freeze the winner into best_parameters.json.
-"""
+"""Automated pilot-seed grid search for simulated_annealing.py."""
 import itertools
 import numpy as np
 

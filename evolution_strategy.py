@@ -1,24 +1,4 @@
 """Student file: Evolution Strategy, truncation selection + Gaussian mutation.
-
-Design choices (justified in the report):
-- Population structure: mu parents produce lambda offspring each generation.
-  mu is derived from mu_over_lambda (a RATIO, not a raw count) so that
-  "selection pressure" means the same thing regardless of which lambda is
-  being tested -- e.g. ratio=0.2 always means "keep the best 20%," whether
-  lambda is 20 or 100.
-- Offspring generation: each offspring picks ONE parent uniformly at random
-  and mutates it with an isotropic Gaussian step, sigma = sigma_frac *
-  domain_width -- same normalized-scale design as hill_climbing.py /
-  simulated_annealing.py, using boundary.reflect() for boundary handling.
-- Selection: truncation -- generate all lambda offspring, evaluate them,
-  keep only the best mu as next generation's parents. No probabilistic
-  selection; a hard cutoff by rank.
-- Replacement rule: (mu,lambda) by default -- next generation's parents come
-  ONLY from this generation's offspring, even if a previous parent was
-  better. This deliberately allows "forgetting" a good-but-possibly-lucky
-  point, which helps avoid premature convergence (elitism risk) on
-  many-local-minima landscapes like Rastrigin. (mu+lambda) is supported as
-  an alternative but not swept in the pilot grid (see tune file).
 """
 import numpy as np
 
@@ -27,7 +7,7 @@ from boundary import reflect
 from params_store import load_parameters
 
 BENCHMARKS_TO_RUN = ["sphere", "rastrigin", "rosenbrock"]
-SEEDS = [0]  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
+SEEDS = range(100, 120)  # Pilot: [0, 1, 2, 3, 4]. Final: range(100, 120).
 MAX_EVALUATIONS = 20_000
 
 DEFAULT_PARAMETERS = {

@@ -1,12 +1,4 @@
-"""Automated pilot-seed grid search for genetic_algorithm.py.
-
-Grid: population_size x crossover_rate x sigma_frac swept (18 combos,
-matching simulated_annealing.py / evolution_strategy.py grid size).
-tournament_size, mutation_rate, and crossover type are fixed (see
-genetic_algorithm.py design rationale) -- weakest-justified dials only,
-consistent with the same precedent as SA's reheat_enabled and ES's
-replacement.
-"""
+"""Automated pilot-seed grid search for genetic_algorithm.py."""
 import itertools
 import numpy as np
 
