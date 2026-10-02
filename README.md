@@ -1,101 +1,179 @@
-# Optimization Using Metaheuristics
+# Metaheuristics Benchmarking Project
 
-This is a small, function-based starter repository. The infrastructure provides
-the three test problems, fair objective-evaluation counting, CSV logging, and
-plots. Implement the algorithms and make the algorithm-design choices.
+Four metaheuristic optimization algorithms — **Hill Climbing**, **Simulated
+Annealing**, an **Evolution Strategy**, and a **Genetic Algorithm** —
+implemented and benchmarked on three standard continuous test functions:
+**Sphere**, **Rastrigin**, and **Rosenbrock**.
 
-## Install
+The starter code (benchmarks, the evaluation engine, and four empty
+algorithm files) was provided for the course assignment. Everything under
+**"Added on top of the starter"** below is custom infrastructure built for
+this project: a shared boundary handler, a pilot-seed tuning pipeline for
+each algorithm, and the scripts that produce the final results.
 
-Python 3.11 or newer is required.
+Cloning this repo and running the commands below reproduces the full
+pipeline end to end — pilot tuning, final runs, and every output file —
+from scratch.
+
+---
+
+## Project layout (as checked into git)
+
+.
+├── benchmarks.py # Sphere, Rastrigin, Rosenbrock (starter)
+├── experiment.py # Evaluation engine — logging, plotting (starter)
+├── random_search.py # Reference baseline (starter)
+│
+├── boundary.py # Shared boundary reflection, used by all 4 algorithms
+├── params_store.py # Read/write helpers for best_parameters.json
+│
+├── hill_climbing.py
+├── simulated_annealing.py
+├── evolution_strategy.py
+├── genetic_algorithm.py
+│
+├── tune_hill_climbing.py # Pilot-seed grid search for Hill Climbing
+├── tune_simulated_annealing.py # Pilot-seed grid search for Simulated Annealing
+├── tune_evolution_strategy.py # Pilot-seed grid search for Evolution Strategy
+├── tune_genetic_algorithm.py # Pilot-seed grid search for the Genetic Algorithm
+│
+├── tests/
+├── pyproject.toml
+└── .gitignore
+
+
+`best_parameters.json` and `results/` are not part of this layout — both are
+generated output, not source. See below for when and where they appear.
+
+---
+
+## Added on top of the starter
+
+**`boundary.py`** — a single `reflect()` function used by all four
+algorithms instead of each handling out-of-bounds candidates separately.
+Centralizing this keeps the comparison between algorithms fair: any
+performance gap comes from the search strategy itself, not from
+inconsistent boundary treatment.
+
+**`tune_hill_climbing.py`, `tune_simulated_annealing.py`,
+`tune_evolution_strategy.py`, `tune_genetic_algorithm.py`** — one grid
+search per algorithm, run only on the 5 **pilot seeds (0–4)**. Each tries
+every combination of a small set of candidate hyperparameter values and
+keeps the one with the best median result (normalized against the
+`random_search` baseline). The **20 final seeds (100–119)** are never used
+during tuning, so the final-seed results are an unbiased estimate of each
+algorithm's performance rather than numbers chosen to look good.
+
+**`params_store.py`** — `load_parameters()` / `save_parameters()`, shared by
+all 8 files that touch tuned parameters (4 tuners writing, 4 algorithms
+reading). Keeps the JSON read/write logic — including merging in one
+algorithm's entry without overwriting another's — in a single place instead
+of duplicated across 8 files.
+
+---
+
+## Setup
+
+Requires Python 3.11+.
 
 ```bash
 python -m pip install -e '.[test]'
 ```
 
-The only runtime dependencies are NumPy and Matplotlib. Pytest is included in
-the optional test dependencies.
-
-## Try a benchmark
+Dependencies: NumPy and Matplotlib (runtime), pytest (tests).
 
 ```bash
-python benchmarks.py
-python random_search.py
+python benchmarks.py     # prints domain/dimension/optimum for all 3 benchmarks
+python random_search.py  # runs the baseline, writes to results/
 ```
 
-`benchmarks.py` prints the domain, dimension, and optimum check for Sphere,
-Rastrigin, and Rosenbrock. `random_search.py` is a working example of the engine;
-it writes CSV logs and plots into `results/`.
+---
 
-To work on an algorithm, open its file:
+## Running the pipeline, and what gets generated where
 
-- `hill_climbing.py`
-- `simulated_annealing.py`
-- `evolution_strategy.py`
-- `genetic_algorithm.py`
+### 1. Pilot tuning (seeds 0–4)
 
-Choose the benchmark at the top:
-
-```python
-BENCHMARKS_TO_RUN = ["rosenbrock"]
-SEEDS = [0]
-PARAMETERS = {}
+```bash
+python tune_hill_climbing.py
+python tune_simulated_annealing.py
+python tune_evolution_strategy.py
+python tune_genetic_algorithm.py
 ```
 
-Implement the function and run the file directly:
+**Generates:** `best_parameters.json` at the repo root, created
+automatically on first run — no manual setup required. Each script prints
+every combination it tried, then calls `save_parameters()` to write (or
+update) its own section of this file. After running all four, the file
+holds 4 algorithms × 3 benchmarks = 12 tuned parameter sets.
+
+### 2. Final runs (seeds 100–119)
 
 ```bash
 python hill_climbing.py
+python simulated_annealing.py
+python evolution_strategy.py
+python genetic_algorithm.py
 ```
 
-Use `SEEDS = [0, 1, 2, 3, 4]` for pilot experiments. After choosing and
-freezing your design, use `SEEDS = range(100, 120)` for final experiments. To
-run all problems, set:
+Each algorithm file calls `load_parameters()` automatically, so these runs
+use whatever `best_parameters.json` produced in step 1 — no manual copying
+needed. 3 benchmarks × 20 seeds × 20,000 evaluations per algorithm.
 
-```python
-BENCHMARKS_TO_RUN = ["sphere", "rastrigin", "rosenbrock"]
+**Generates:** a `results/` folder at the repo root, created automatically
+on first run by each algorithm file. Four files per (algorithm, benchmark)
+pair:
+
+- `results/{algorithm}_{benchmark}_results.csv` — final best value per seed
+- `results/{algorithm}_{benchmark}_history.csv` — best-so-far every 100 evaluations
+- `results/{algorithm}_{benchmark}_convergence.png` — median/IQR convergence plot
+- `results/{algorithm}_{benchmark}_final_values.png` — boxplot of final values
+
+### 3. Project layout after a full run
+
+.
+├── ... (unchanged — see layout above)
+├── best_parameters.json # generated by step 1
+└── results/ # generated by step 2
+├── hill_climbing_sphere_results.csv
+├── hill_climbing_sphere_history.csv
+├── hill_climbing_sphere_convergence.png
+├── hill_climbing_sphere_final_values.png
+├── ... (same 4 files × 3 benchmarks × 4 algorithms = 48 files total)
+
+
+
+
+---
+
+## Generated files and `.gitignore`
+
+results/
+best_parameters.json
+
+
+Both are fully reproducible from the commands above — the pipeline is
+deterministic given the fixed pilot/final seeds in `experiment.py` — so
+neither is tracked in git. A fresh clone plus the steps above regenerates
+both from scratch, identically every time.
+
+---
+
+## Tests
+
+```bash
+pytest
 ```
 
-## What the engine provides
+---
 
-Every algorithm receives these arguments:
+## Engine reference
 
-- `objective`: call this once for each candidate that you evaluate;
-- `lower_bound`, `upper_bound`, and `dimension`;
-- `rng`: a reproducible `numpy.random.default_rng(seed)` generator;
-- `max_evaluations`: the fixed objective-call limit;
-- the contents of your own `PARAMETERS` dictionary.
-
-Use `objective.remaining` to avoid exceeding the budget. Initialization counts.
-Population members count separately. The runner rejects early stopping and the
-objective raises an error before a call beyond the budget.
-
-The engine does **not** provide iteration counts. An iteration has different
-costs for a single-state algorithm and a population algorithm, so the common
-fair limit is 20,000 objective evaluations. Your algorithm may maintain its own
-iteration or generation counter if it needs one.
-
-## What interns choose and implement
-
-Implement random candidate creation, selection, reproduction, joining
-or survivor replacement, boundary handling, and all algorithm-specific
-hyperparameters. Examples of choices discussed in training include truncation,
-tournament or roulette selection; Gaussian or bounded-uniform changes;
-one-point, two-point, uniform, or line crossover; restart and cooling behavior;
-and `(mu, lambda)` or `(mu + lambda)` survivor selection.
-
-The starter does not choose or implement these decisions in the four student
-files. Put chosen values in each file's `PARAMETERS` dictionary and explain the
-exploration/exploitation reasoning in the report.
-
-## Output
-
-Running an implemented algorithm produces:
-
-- one CSV containing the best candidate and final raw objective for each seed;
-- one CSV containing best-so-far values every 100 objective calls;
-- a median/IQR convergence plot;
-- a final-objective boxplot.
-
-Lower objective values are better. The final protocol remains 3 benchmarks x
-20 final seeds = 60 runs per algorithm, all with 20,000 objective evaluations.
-
+- `objective.remaining` tracks the evaluation budget left; exceeding the
+  20,000-evaluation limit raises an error.
+- No iteration counter is exposed — an "iteration" costs a different number
+  of evaluations for a single-point algorithm (Hill Climbing, SA) versus a
+  population algorithm (ES, GA), so evaluations are the fair unit to compare
+  on.
+- `rng = numpy.random.default_rng(seed)` — reproducible per seed.
+- Pilot seeds: `0–4`. Final seeds: `100–119`. Lower objective value is
+  better for all three benchmarks.
